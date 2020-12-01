@@ -1,4 +1,4 @@
-dataset_type = 'CocoDataset'
+dataset_type = 'VOCDataset'
 data_root = 'data/butterfly/'
 classes = [str(i + 1) for i in range(94)]
 img_norm_cfg = dict(
