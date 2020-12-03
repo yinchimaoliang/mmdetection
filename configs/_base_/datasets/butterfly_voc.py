@@ -69,9 +69,10 @@ data = dict(
         ),
     test=dict(
         type=dataset_type,
-        ann_file=data_root + 'ImageSets/Main/val.txt',
-        img_prefix=data_root,
+        ann_file=data_root + 'ImageSets/Main/test.txt',
+        img_prefix=data_root + 'TestData',
         pipeline=test_pipeline,
+        test_mode=True,
         classes=['蟾福蛱蝶', '素弄蝶', '线灰蝶', '无斑珂弄蝶', '老豹蛱蝶', '突角小粉蝶', '尖翅翠蛱蝶', '柑橘凤蝶', '箭纹绢粉蝶', '碧凤蝶', '亮灰蝶', '银斑豹蛱蝶',
                  '宽边黄粉蝶',
                  '灿福蛱蝶', '蛇目褐蚬蝶', '巴黎翠凤蝶', '黄钩蛱蝶', '翠袖锯眼蝶', '红基美凤蝶', '虬眉带蛱蝶', '黄环蛱蝶', '翠蓝眼蛱蝶', '隐纹谷弄蝶', '蓝点紫斑蝶',
