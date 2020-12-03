@@ -7,7 +7,7 @@ import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description='MMDet test (and eval) a model')
+        description='MMDet inference a model')
     parser.add_argument(
         '--image-path', help='path of images to be tested')
     parser.add_argument(
