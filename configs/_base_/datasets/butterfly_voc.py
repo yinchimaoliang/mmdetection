@@ -29,14 +29,14 @@ test_pipeline = [
         ])
 ]
 data = dict(
-    samples_per_gpu=2,
-    workers_per_gpu=2,
+    samples_per_gpu=6,
+    workers_per_gpu=6,
     train=dict(
         type='RepeatDataset',
         times=3,
         dataset=dict(
             type=dataset_type,
-            ann_file=data_root + 'ImageSets/Main/train.txt',
+            ann_file=data_root + 'ImageSets/Main/trainval.txt',
             img_prefix=data_root,
             pipeline=train_pipeline,
             classes=['蟾福蛱蝶', '素弄蝶', '线灰蝶', '无斑珂弄蝶', '老豹蛱蝶', '突角小粉蝶', '尖翅翠蛱蝶', '柑橘凤蝶', '箭纹绢粉蝶', '碧凤蝶', '亮灰蝶', '银斑豹蛱蝶', '宽边黄粉蝶',
