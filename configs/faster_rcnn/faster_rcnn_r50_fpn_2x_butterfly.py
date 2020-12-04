@@ -6,8 +6,6 @@ _base_ = [
 
 model = dict(
     rpn_head=dict(
-        loss_cls=dict(
-            type='FocalLoss', use_sigmoid=True, loss_weight=0.01),
         loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
     roi_head=dict(
         bbox_head=dict(
