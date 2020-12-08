@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/datasets/butterfly_coco.py',
+    '../_base_/datasets/butterfly_voc.py',
     '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
 ]
 # model settings
@@ -26,7 +26,7 @@ model = dict(
         relu_before_extra_convs=True),
     bbox_head=dict(
         type='VFNetHead',
-        num_classes=80,
+        num_classes=94,
         in_channels=256,
         stacked_convs=3,
         feat_channels=256,
@@ -92,8 +92,7 @@ data = dict(
     samples_per_gpu=2,
     workers_per_gpu=2,
     train=dict(pipeline=train_pipeline),
-    val=dict(pipeline=test_pipeline),
-    test=dict(pipeline=test_pipeline))
+    val=dict(pipeline=test_pipeline))
 
 # optimizer
 optimizer = dict(
