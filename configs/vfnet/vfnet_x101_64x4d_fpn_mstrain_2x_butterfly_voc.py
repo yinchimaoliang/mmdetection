@@ -1,4 +1,4 @@
-_base_ = './vfnet_r50_fpn_mstrain_2x_butterfly.py'
+_base_ = './vfnet_r50_fpn_mstrain_2x_butterfly_voc.py'
 model = dict(
     pretrained='open-mmlab://resnext101_64x4d',
     backbone=dict(
