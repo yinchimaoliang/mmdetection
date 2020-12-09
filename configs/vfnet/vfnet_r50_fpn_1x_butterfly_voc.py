@@ -41,7 +41,7 @@ model = dict(
             alpha=0.75,
             gamma=2.0,
             iou_weighted=True,
-            loss_weight=0.1),
+            loss_weight=1),
         loss_bbox=dict(type='GIoULoss', loss_weight=1.5),
         loss_bbox_refine=dict(type='GIoULoss', loss_weight=2.0)))
 
