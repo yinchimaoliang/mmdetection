@@ -5,4 +5,4 @@ img_norm_cfg = dict(
 lr_config = dict(step=[16, 22])
 total_epochs = 24
 
-optimizer = dict(type='SGD', lr=0.00002, momentum=0.9, weight_decay=0.0001)
+optimizer = dict(type='SGD', lr=0.002, momentum=0.9, weight_decay=0.0001)
