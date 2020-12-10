@@ -32,8 +32,7 @@ test_pipeline = [
 ]
 data = dict(
     train=dict(pipeline=train_pipeline),
-    val=dict(pipeline=test_pipeline),
-    test=dict(pipeline=test_pipeline))
+    val=dict(pipeline=test_pipeline))
 # learning policy
 lr_config = dict(step=[16, 22])
 total_epochs = 24
