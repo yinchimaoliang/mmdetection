@@ -40,16 +40,20 @@ data = dict(
     samples_per_gpu=6,
     workers_per_gpu=6,
     train=dict(
-        type='RepeatDataset',
-        times=6,
+        type='ClassBalancedDataset',
         dataset=dict(
-            type=dataset_type,
-            ann_file=data_root + 'ImageSets/Main/train.txt',
-            img_prefix=data_root,
-            pipeline=train_pipeline,
-            classes=classes
-            ),
+            type='RepeatDataset',
+            times=6,
+            dataset=dict(
+                type=dataset_type,
+                ann_file=data_root + 'ImageSets/Main/train.txt',
+                img_prefix=data_root,
+                pipeline=train_pipeline,
+                classes=classes
+                ),
 
+        ),
+        oversample_thr=0.03,
     ),
     val=dict(
         type=dataset_type,
