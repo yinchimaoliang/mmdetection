@@ -3,7 +3,7 @@ dataset_type = 'VOCDataset'
 data_root = 'data/cell/'
 classes = ['226', '50', '224', '39', '323', '74', '27', '174', '66', '61', '285', '281', '209', '63', '324', '59', '173', '34', '28', '211', '210', '49', '225', '172', '60', '19', '46', '43', '57', '52', '93', '35', '91']
 img_norm_cfg = dict(
-    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+    mean=[216.29945567, 185.00888325, 197.98572283], std=[16.8434652,  53.26599443, 37.6515256], to_rgb=True)
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),

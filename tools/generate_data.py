@@ -21,14 +21,30 @@ def parse_args():
 
 def _count_data_info(target_dir):
     annos = glob.glob(osp.join(target_dir, 'Annotations', '*.xml'))
-    names = []
+    class_names = []
+    bgrs = []
     for anno in annos:
         tree = ET.parse(anno)
         root = tree.getroot()
         for obj in root.findall('object'):
             name = obj.find('name').text
-            names.append(name)
-    return set(names)
+            class_names.append(name)
+
+    np.random.shuffle(annos)
+    for i in range(100):
+        anno = annos[i]
+        tree = ET.parse(anno)
+        root = tree.getroot()
+        filename = root.find('filename').text
+        img = mmcv.imread(osp.join(target_dir, 'JPEGImages', filename))
+        img = mmcv.imresize(img, (img.shape[1] // 10, img.shape[0] // 10))
+        bgrs.append(img.reshape(-1, 3))
+        print(i)
+    bgrs = np.concatenate(bgrs, axis=0)
+    mean = np.mean(bgrs, axis=0)
+    std = np.std(bgrs, axis=0)
+    print(mean, std)
+    return set(class_names)
 
 
 def _generate_division(target_path, train_ratio):
