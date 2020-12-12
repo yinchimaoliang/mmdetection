@@ -20,7 +20,8 @@ class VOCDataset(XMLDataset):
         elif 'VOC2012' in self.img_prefix:
             self.year = 2012
         else:
-            self.year = 2007
+            self.year = 2012
+            # raise ValueError('Cannot infer dataset year from img_prefix')
 
     def evaluate(self,
                  results,
