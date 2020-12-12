@@ -1,8 +1,10 @@
 import argparse
 import mmcv
 import glob
-import shutil
+import numpy as np
 import os.path as osp
+import os
+import xml.etree.ElementTree as ET
 from lxml.etree import Element, SubElement, tostring
 from xml.dom.minidom import parseString
 
@@ -11,9 +13,43 @@ def parse_args():
     parser.add_argument('--source-dir', default='/home1/lixiao/celldata', help='the dir of the source data')
     parser.add_argument(
         '--target-dir', default='/home1/yinhaoli/data/cell', help='the dir to save the generated data')
+    parser.add_argument(
+        '--train-ratio', default=0.7, type=int, help='ratio of the train number')
 
     args = parser.parse_args()
     return args
+
+def _count_data_info(target_dir):
+    annos = glob.glob(osp.join(target_dir, 'Annotations', '*.xml'))
+    names = []
+    for anno in annos:
+        tree = ET.parse(anno)
+        root = tree.getroot()
+        for obj in root.findall('object'):
+            name = obj.find('name').text
+            names.append(name)
+    return set(names)
+
+
+def _generate_division(target_path, train_ratio):
+    mmcv.mkdir_or_exist(osp.join(target_path, 'ImageSets', 'Main'))
+    names = os.listdir(osp.join(target_path, 'Annotations'))
+    np.random.shuffle(names)
+    train_names = names[:int(len(names) * train_ratio)]
+    val_names = names[int(len(names) * train_ratio):]
+    with open(osp.join(target_path, 'ImageSets', 'Main', 'trainval.txt'), 'w') as f:
+        for name in names:
+            f.write(name.split('.')[0] + '\n')
+    with open(osp.join(target_path, 'ImageSets', 'Main', 'train.txt'), 'w') as f:
+        for train_name in train_names:
+            f.write(train_name.split('.')[0] + '\n')
+    with open(osp.join(target_path, 'ImageSets', 'Main', 'val.txt'), 'w') as f:
+        for val_name in val_names:
+            f.write(val_name.split('.')[0] + '\n')
+
+
+
+
 
 def _make_xml(target_path, obj_data, image_name):
 
@@ -94,7 +130,7 @@ def _generate_ann(target_dir, annotations):
         if filename == '010008610797F9F5026D8B245A023F72AFBA0F76C702.jpg' or not osp.exists(osp.join(target_dir, 'JPEGImages', filename)) or filename == '010009AA7D8185BC63EA5FFBAED2D916A8DE1DC27602.jpg' or filename == '0100098862143E8B22ED715C1305DF63124F68439402.jpg':
             continue
         dom = _make_xml(target_dir, annotations_dict[filename], filename)
-        with open(osp.join(target_dir, 'Annotations', filename.split('.')[0] + 'xml'), 'wb') as f:
+        with open(osp.join(target_dir, 'Annotations', filename.split('.')[0] + '.xml'), 'wb') as f:
             f.write(dom.toprettyxml(encoding='utf-8'))
         print(f'{filename} finished')
 
@@ -102,8 +138,11 @@ def main():
     args = parse_args()
     source_dir = args.source_dir
     target_dir = args.target_dir
-    annotations = _copy_data(source_dir, target_dir)
-    _generate_ann(target_dir, annotations)
-
+    train_ratio = args.train_ratio
+    # annotations = _copy_data(source_dir, target_dir)
+    # _generate_ann(target_dir, annotations)
+    # _generate_division(target_dir, train_ratio)
+    names = _count_data_info(target_dir)
+    print(names)
 if __name__ == '__main__':
     main()
