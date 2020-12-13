@@ -17,6 +17,8 @@ def parse_args():
         '--ckpt-path', help='checkpoint file to be used')
     parser.add_argument(
         '--score-thr', default=0.3, help='threshold score to show the result')
+    parser.add_argument(
+        '--type', help='type of the task(chromosome_class or chromosome_count)')
     args = parser.parse_args()
 
     return args
@@ -28,13 +30,14 @@ def main():
     checkpoint_file = args.ckpt_path
     result_path = args.result_path
     score_thr = args.score_thr
+    type = args.type
     mmcv.mkdir_or_exist(result_path)
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
     with open(args.image_path) as f:
         names = f.readlines()
     for name in names:
         name = name[:-1]
-        img = osp.join('data/karyotype/PNGImages', name + '.png')
+        img = osp.join('data/karyotype', type, 'PNGImages', name + '.png')
         file_name = name.split('.')[0]
         result = inference_detector(model, img)
         if hasattr(model, 'module'):
