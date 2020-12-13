@@ -28,14 +28,14 @@ def _count_data_info(target_dir):
             class_names.append(name)
 
     np.random.shuffle(annos)
-    for i in range(100):
-        anno = annos[i]
+    for anno in annos:
         tree = ET.parse(anno)
         root = tree.getroot()
         filename = root.find('filename').text
-        img = mmcv.imread(osp.join(target_dir, 'PNGImages', filename))
-        img = mmcv.imresize(img, (img.shape[1] // 10, img.shape[0] // 10))
+        img = mmcv.imread(osp.join(target_dir, 'JPEGImages', filename))
+        img = mmcv.imresize(img, (img.shape[1] // 100, img.shape[0] // 100))
         bgrs.append(img.reshape(-1, 3))
+        print(f'{anno} finished')
     bgrs = np.concatenate(bgrs, axis=0)
     mean = np.mean(bgrs, axis=0)
     std = np.std(bgrs, axis=0)
@@ -64,7 +64,7 @@ def main():
     args = parse_args()
     target_dir = args.target_dir
     train_ratio = args.train_ratio
-    _generate_division(target_dir, train_ratio)
+    # _generate_division(target_dir, train_ratio)
     names = _count_data_info(target_dir)
     print(names)
 if __name__ == '__main__':
