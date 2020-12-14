@@ -1,5 +1,8 @@
 from collections import OrderedDict
 
+import mmcv
+import os.path as osp
+import numpy as np
 from mmdet.core import eval_map, eval_recalls
 from .builder import DATASETS
 from .xml_style import XMLDataset
@@ -22,6 +25,15 @@ class VOCDataset(XMLDataset):
         else:
             self.year = 2012
             # raise ValueError('Cannot infer dataset year from img_prefix')
+
+    def show_gt(self, out_dir):
+        annotations = [self.get_ann_info(i) for i in range(len(self))]
+        for i, data_info in enumerate(self.data_infos):
+            anno = annotations[i]
+            filename = data_info['filename']
+            img = mmcv.imread(osp.join(out_dir, filename))
+            mmcv.imshow_det_bboxes(img, anno['bboxes'], anno['labels'],bbox_color='red',text_color='red', class_names=self.CLASSES, out_file=osp.join(out_dir, filename), show=False)
+
 
     def evaluate(self,
                  results,
