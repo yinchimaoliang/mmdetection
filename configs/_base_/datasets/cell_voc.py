@@ -48,6 +48,7 @@ data = dict(
         pipeline=test_pipeline,
         classes=classes),
     test=dict(
+        samples_per_gpu=12,
         type=dataset_type,
         ann_file=data_root + 'ImageSets/Main/val.txt',
         img_prefix=data_root,
