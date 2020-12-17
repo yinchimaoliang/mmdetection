@@ -10,4 +10,8 @@ model = dict(
         out_indices=(0, 1, 2, 3),
         frozen_stages=1,
         norm_cfg=dict(type='BN', requires_grad=True),
-        style='pytorch'))
+        style='pytorch'),
+    roi_head=dict(
+        bbox_head=dict(
+            num_classes=24))
+)
