@@ -1,4 +1,4 @@
-_base_ = './faster_rcnn_r50_fpn_2x_chromosome_class.py'
+_base_ = './faster_rcnn_r50_fpn_2x_chromosome_classify.py'
 model = dict(
     pretrained='open-mmlab://resnext101_64x4d',
     backbone=dict(
