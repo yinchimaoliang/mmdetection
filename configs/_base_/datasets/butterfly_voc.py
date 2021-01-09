@@ -100,7 +100,7 @@ data = dict(
         type='ClassBalancedDataset',
         dataset=dict(
             type='RepeatDataset',
-            times=6,
+            times=3,
             dataset=dict(
                 type=dataset_type,
                 ann_file=data_root + 'ImageSets/Main/trainval.txt',
@@ -110,7 +110,7 @@ data = dict(
                 ),
 
         ),
-        oversample_thr=0.03,
+        oversample_thr=0.01,
     ),
     val=dict(
         type=dataset_type,
