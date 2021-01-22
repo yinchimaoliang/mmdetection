@@ -10,9 +10,9 @@ from xml.dom.minidom import parseString
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Generate data')
-    parser.add_argument('--source-dir', default='/home1/lixiao/celldata', help='the dir of the source data')
+    parser.add_argument('--source-dir', default='/home1/yinhaoli/data/cell/forth', help='the dir of the source data')
     parser.add_argument(
-        '--target-dir', default='/home1/yinhaoli/data/cell', help='the dir to save the generated data')
+        '--target-dir', default='/home1/yinhaoli/data/cell/forth', help='the dir to save the generated data')
     parser.add_argument(
         '--train-ratio', default=0.7, type=int, help='ratio of the train number')
 
@@ -132,6 +132,17 @@ def _copy_data(source_dir, target_dir):
                 # shutil.copyfile(image, osp.join(target_dir, 'JPEGImages', filename))
     return annotations
 
+def _get_class_names(annotation_path):
+    xml_names = os.listdir(annotation_path)
+    class_names = []
+    for xml_name in xml_names:
+        tree = ET.parse(osp.join(annotation_path, xml_name))
+        objects = tree.findall('object')
+        for object in objects:
+            class_names.append(object.find('name').text)
+
+    print(set(class_names))
+
 def _generate_ann(target_dir, annotations):
     annotations_dict = dict()
     mmcv.mkdir_or_exist(osp.join(target_dir, 'Annotations'))
@@ -155,10 +166,11 @@ def main():
     source_dir = args.source_dir
     target_dir = args.target_dir
     train_ratio = args.train_ratio
+    _get_class_names(osp.join(args.source_dir, 'Annotations'))
     # annotations = _copy_data(source_dir, target_dir)
     # _generate_ann(target_dir, annotations)
     # _generate_division(target_dir, train_ratio)
-    names = _count_data_info(target_dir)
-    print(names)
+    # names = _count_data_info(target_dir)
+    # print(names)
 if __name__ == '__main__':
     main()
