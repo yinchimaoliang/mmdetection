@@ -27,12 +27,16 @@ class VOCDataset(XMLDataset):
             # raise ValueError('Cannot infer dataset year from img_prefix')
 
     def show_gt(self, out_dir):
+        import pinyin
         annotations = [self.get_ann_info(i) for i in range(len(self))]
+        classes_pinyin = []
+        for class_ch in self.CLASSES:
+            classes_pinyin.append(pinyin.get(class_ch, format='strip'))
         for i, data_info in enumerate(self.data_infos):
             anno = annotations[i]
             filename = data_info['filename']
             img = mmcv.imread(osp.join(out_dir, filename))
-            mmcv.imshow_det_bboxes(img, anno['bboxes'], anno['labels'],bbox_color='red',text_color='red', class_names=self.CLASSES, out_file=osp.join(out_dir, filename), show=False)
+            mmcv.imshow_det_bboxes(img, anno['bboxes'], anno['labels'],bbox_color='red',text_color='red', class_names=classes_pinyin, out_file=osp.join(out_dir, filename), show=False)
 
 
     def evaluate(self,

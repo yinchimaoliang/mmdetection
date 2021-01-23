@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 
+import pinyin
 import mmcv
 import numpy as np
 import torch
@@ -336,11 +337,14 @@ class BaseDetector(nn.Module, metaclass=ABCMeta):
         if out_file is not None:
             show = False
         # draw bounding boxes
+        classes_pinyin = []
+        for class_ch in self.CLASSES:
+            classes_pinyin.append(pinyin.get(class_ch, format='strip'))
         mmcv.imshow_det_bboxes(
             img,
             bboxes,
             labels,
-            class_names=self.CLASSES,
+            class_names=classes_pinyin,
             score_thr=score_thr,
             bbox_color=bbox_color,
             text_color=text_color,
