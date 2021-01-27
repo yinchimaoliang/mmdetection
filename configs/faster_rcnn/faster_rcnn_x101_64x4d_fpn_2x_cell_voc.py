@@ -1,4 +1,4 @@
-_base_ = './faster_rcnn_r50_fpn_2x_cell_voc_forth.py'
+_base_ = './faster_rcnn_r50_fpn_2x_cell_voc.py'
 model = dict(
     pretrained='open-mmlab://resnext101_64x4d',
     backbone=dict(
@@ -13,7 +13,7 @@ model = dict(
         style='pytorch'),
     roi_head=dict(
         bbox_head=dict(
-            num_classes=43,
+            num_classes=80,
     )
     )
 )

@@ -4,15 +4,16 @@ import glob
 import numpy as np
 import os.path as osp
 import os
+import shutil
 import xml.etree.ElementTree as ET
 from lxml.etree import Element, SubElement, tostring
 from xml.dom.minidom import parseString
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Generate data')
-    parser.add_argument('--source-dir', default='/home1/yinhaoli/data/cell/forth', help='the dir of the source data')
+    parser.add_argument('--source-dir', default='/home1/yinhaoli/data/cell/complete-1-26', help='the dir of the source data')
     parser.add_argument(
-        '--target-dir', default='/home1/yinhaoli/data/cell/forth', help='the dir to save the generated data')
+        '--target-dir', default='/home1/yinhaoli/data/cell/complete-1-26', help='the dir to save the generated data')
     parser.add_argument(
         '--train-ratio', default=0.7, type=int, help='ratio of the train number')
 
@@ -45,7 +46,6 @@ def _count_data_info(target_dir):
     std = np.std(bgrs, axis=0)
     print(mean, std)
     return set(class_names)
-
 
 def _generate_division(target_path, train_ratio):
     mmcv.mkdir_or_exist(osp.join(target_path, 'ImageSets', 'Main'))
@@ -118,19 +118,29 @@ def _make_xml(target_path, obj_data, image_name):
     return dom
 
 def _copy_data(source_dir, target_dir):
-    root_folders = glob.glob(osp.join(source_dir, '项目*'))
+    root_folders = os.listdir(source_dir)
     mmcv.mkdir_or_exist(osp.join(target_dir, 'JPEGImages'))
-    annotations = []
+    mmcv.mkdir_or_exist(osp.join(target_dir, 'Annotations'))
     for root_folder in root_folders:
-        data_folders = glob.glob(osp.join(root_folder, '*'))
-        for data_folder in data_folders:
-            images = glob.glob(osp.join(data_folder, '*.jpg'))
-            with open(osp.join(data_folder, 'type.txt')) as f:
-                annotations += f.readlines()
-            for image in images:
-                filename = osp.split(image)[-1]
-                # shutil.copyfile(image, osp.join(target_dir, 'JPEGImages', filename))
-    return annotations
+        names = [osp.split(path)[-1].split('.')[0] for path in glob.glob(osp.join(source_dir, root_folder, '*.xml'))]
+        for name in names:
+            try:
+                shutil.copyfile(osp.join(source_dir, root_folder, name+'.jpg'), osp.join(target_dir, 'JPEGImages', name+'.jpg'))
+                shutil.copyfile(osp.join(source_dir, root_folder, name+'.xml'), osp.join(target_dir, 'Annotations', name+'.xml'))
+            except:
+                print(name)
+
+    # annotations = []
+    # for root_folder in root_folders:
+    #     data_folders = glob.glob(osp.join(root_folder, '*'))
+    #     for data_folder in data_folders:
+    #         images = glob.glob(osp.join(data_folder, '*.jpg'))
+    #         with open(osp.join(data_folder, 'type.txt')) as f:
+    #             annotations += f.readlines()
+    #         for image in images:
+    #             filename = osp.split(image)[-1]
+    #             shutil.copyfile(image, osp.join(target_dir, 'JPEGImages', filename))
+    # return annotations
 
 def _get_class_names(annotation_path):
     xml_names = os.listdir(annotation_path)
@@ -166,6 +176,7 @@ def main():
     source_dir = args.source_dir
     target_dir = args.target_dir
     train_ratio = args.train_ratio
+    # _copy_data(source_dir, target_dir)
     _get_class_names(osp.join(args.source_dir, 'Annotations'))
     # annotations = _copy_data(source_dir, target_dir)
     # _generate_ann(target_dir, annotations)
