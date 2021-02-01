@@ -11,7 +11,7 @@ from xml.dom.minidom import parseString
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Generate data')
-    parser.add_argument('--source-dir', default='/home1/yinhaoli/data/cell/complete-1-26', help='the dir of the source data')
+    parser.add_argument('--source-dir', default='/home1/yinhaoli/data/cell/complete-1-26/origin', help='the dir of the source data')
     parser.add_argument(
         '--target-dir', default='/home1/yinhaoli/data/cell/complete-1-26', help='the dir to save the generated data')
     parser.add_argument(
@@ -177,7 +177,7 @@ def main():
     target_dir = args.target_dir
     train_ratio = args.train_ratio
     # _copy_data(source_dir, target_dir)
-    _get_class_names(osp.join(args.source_dir, 'Annotations'))
+    _get_class_names(osp.join(args.target_dir, 'Annotations'))
     # annotations = _copy_data(source_dir, target_dir)
     # _generate_ann(target_dir, annotations)
     # _generate_division(target_dir, train_ratio)
