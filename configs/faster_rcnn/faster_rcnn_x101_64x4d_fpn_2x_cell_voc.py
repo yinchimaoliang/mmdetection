@@ -13,7 +13,7 @@ model = dict(
         style='pytorch'),
     roi_head=dict(
         bbox_head=dict(
-            num_classes=91,
+            num_classes=46,
     )
     )
 )
