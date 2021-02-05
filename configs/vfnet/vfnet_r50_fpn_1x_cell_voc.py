@@ -26,7 +26,7 @@ model = dict(
         relu_before_extra_convs=True),
     bbox_head=dict(
         type='VFNetHead',
-        num_classes=80,
+        num_classes=46,
         in_channels=256,
         stacked_convs=3,
         feat_channels=256,
@@ -60,7 +60,7 @@ test_cfg = dict(
 
 # data setting
 dataset_type = 'VOCDataset'
-data_root = 'data/cell/'
+data_root = 'data/cell/complete-1-26/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 train_pipeline = [
