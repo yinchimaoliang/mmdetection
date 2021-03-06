@@ -17,7 +17,7 @@ def parse_args():
     parser.add_argument(
         '--target-dir', default='/home1/yinhaoli/data/cell/complete-1-26', help='the dir to save the generated data')
     parser.add_argument(
-        '--train-ratio', default=0.7, type=int, help='ratio of the train number')
+        '--train-ratio', default=0.7, type=float, help='ratio of the train number')
 
     args = parser.parse_args()
     return args
@@ -184,18 +184,42 @@ def _change_names(target_dir, change_dict):
         print(anno)
 
 
+def _divide_dataset(source_dir, target_dir, train_ratio):
+    names = os.listdir(osp.join(source_dir, 'Annotations'))
+    np.random.shuffle(names)
+    train_names = names[:int(len(names) * train_ratio)]
+    valid_names = names[int(len(names) * train_ratio):]
+    with open(osp.join(target_dir, 'train.txt'), 'w') as f:
+        for train_name in train_names:
+            name = train_name.split('.')[0]
+            if not osp.exists(osp.join(source_dir, 'JPEGImages', f'{name}.jpg')):
+                continue
+            f.write(f'{name}\n')
+
+    with open(osp.join(target_dir, 'valid.txt'), 'w') as f:
+        for valid_name in valid_names:
+            name = valid_name.split('.')[0]
+            if not osp.exists(osp.join(source_dir, 'JPEGImages', f'{name}.jpg')):
+                continue
+            f.write(f'{name}\n')
+
+
+
+
 def main():
     args = parse_args()
     source_dir = args.source_dir
     target_dir = args.target_dir
     train_ratio = args.train_ratio
-    # _change_names(target_dir, change_dict)
+    # _change_names(source_dir, change_dict)
     # _copy_data(source_dir, target_dir)
-    _get_class_names(osp.join(args.target_dir, 'Annotations'))
+    # _get_class_names(osp.join(args.target_dir, 'Annotations'))
     # annotations = _copy_data(source_dir, target_dir)
     # _generate_ann(target_dir, annotations)
     # _generate_division(target_dir, train_ratio)
     # names = _count_data_info(target_dir)
     # print(names)
+    _divide_dataset(source_dir, target_dir, train_ratio)
+    # _get_class_names(osp.join(source_dir, 'Annotations'))
 if __name__ == '__main__':
     main()
