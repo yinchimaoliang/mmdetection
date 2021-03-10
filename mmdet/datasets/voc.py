@@ -3,7 +3,7 @@ from collections import OrderedDict
 import mmcv
 import os.path as osp
 import numpy as np
-from mmdet.core import eval_map, eval_recalls
+from mmdet.core import eval_map, eval_recalls, eval_class_iou
 from .builder import DATASETS
 from .xml_style import XMLDataset
 
@@ -71,7 +71,7 @@ class VOCDataset(XMLDataset):
         if not isinstance(metric, str):
             assert len(metric) == 1
             metric = metric[0]
-        allowed_metrics = ['mAP', 'recall']
+        allowed_metrics = ['mAP', 'recall', 'mClassIoU']
         if metric not in allowed_metrics:
             raise KeyError(f'metric {metric} is not supported')
         annotations = [self.get_ann_info(i) for i in range(len(self))]
@@ -90,6 +90,16 @@ class VOCDataset(XMLDataset):
                 dataset=ds_name,
                 logger=logger)
             eval_results['mAP'] = mean_ap
+        elif metric == 'mClassIoU':
+            mean_class_iou = eval_class_iou(
+                results,
+                annotations,
+                scale_ranges=scale_ranges,
+                iou_thr=iou_thr,
+                dataset=self.CLASSES,
+                logger=logger)
+            eval_results['mClassIoU'] = mean_class_iou
+
         elif metric == 'recall':
             gt_bboxes = [ann['bboxes'] for ann in annotations]
             if isinstance(iou_thr, float):

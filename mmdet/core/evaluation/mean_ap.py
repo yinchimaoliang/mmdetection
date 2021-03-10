@@ -467,3 +467,143 @@ def print_map_summary(mean_ap,
         table = AsciiTable(table_data)
         table.inner_footing_row_border = True
         print_log('\n' + table.table, logger=logger)
+
+
+def eval_class_iou(det_results,
+             annotations,
+             scale_ranges=None,
+             iou_thr=0.5,
+             dataset=None,
+             logger=None,
+             tpfp_fn=None,
+             nproc=4):
+    """Evaluate mAP of a dataset.
+
+    Args:
+        det_results (list[list]): [[cls1_det, cls2_det, ...], ...].
+            The outer list indicates images, and the inner list indicates
+            per-class detected bboxes.
+        annotations (list[dict]): Ground truth annotations where each item of
+            the list indicates an image. Keys of annotations are:
+
+            - `bboxes`: numpy array of shape (n, 4)
+            - `labels`: numpy array of shape (n, )
+            - `bboxes_ignore` (optional): numpy array of shape (k, 4)
+            - `labels_ignore` (optional): numpy array of shape (k, )
+        scale_ranges (list[tuple] | None): Range of scales to be evaluated,
+            in the format [(min1, max1), (min2, max2), ...]. A range of
+            (32, 64) means the area range between (32**2, 64**2).
+            Default: None.
+        iou_thr (float): IoU threshold to be considered as matched.
+            Default: 0.5.
+        dataset (list[str] | str | None): Dataset name or dataset classes,
+            there are minor differences in metrics for different datsets, e.g.
+            "voc07", "imagenet_det", etc. Default: None.
+        logger (logging.Logger | str | None): The way to print the mAP
+            summary. See `mmdet.utils.print_log()` for details. Default: None.
+        tpfp_fn (callable | None): The function used to determine true/
+            false positives. If None, :func:`tpfp_default` is used as default
+            unless dataset is 'det' or 'vid' (:func:`tpfp_imagenet` in this
+            case). If it is given as a function, then this function is used
+            to evaluate tp & fp. Default None.
+        nproc (int): Processes used for computing TP and FP.
+            Default: 4.
+
+    Returns:
+        tuple: (mAP, [dict, dict, ...])
+    """
+    assert len(det_results) == len(annotations)
+
+    num_imgs = len(det_results)
+    num_scales = len(scale_ranges) if scale_ranges is not None else 1
+    num_classes = len(det_results[0])  # positive class num
+    area_ranges = ([(rg[0]**2, rg[1]**2) for rg in scale_ranges]
+                   if scale_ranges is not None else None)
+
+
+    eval_results = np.zeros((num_imgs, num_classes))
+    eval_gts = np.zeros((num_imgs, num_classes))
+    for j in range(num_classes):
+        # get gt and det bboxes of this class
+        cls_dets, cls_gts, cls_gts_ignore = get_cls_results(
+            det_results, annotations, j)
+
+        for i in range(num_imgs):
+            if len(cls_dets[i]) > 0:
+                eval_results[i][j] = 1
+            if len(cls_gts[i]) > 0:
+                eval_gts[i][j] = 1
+
+    class_iou = np.logical_and(eval_results, eval_gts).sum(1) >= 1
+
+
+    # print_map_summary(
+    #     class_iou, eval_results, dataset, area_ranges, logger=logger)
+
+    return np.nanmean(class_iou)
+
+def print_map_summary(mean_ap,
+                      results,
+                      dataset=None,
+                      scale_ranges=None,
+                      logger=None):
+    """Print mAP and results of each class.
+
+    A table will be printed to show the gts/dets/recall/AP of each class and
+    the mAP.
+
+    Args:
+        mean_ap (float): Calculated from `eval_map()`.
+        results (list[dict]): Calculated from `eval_map()`.
+        dataset (list[str] | str | None): Dataset name or dataset classes.
+        scale_ranges (list[tuple] | None): Range of scales to be evaluated.
+        logger (logging.Logger | str | None): The way to print the mAP
+            summary. See `mmdet.utils.print_log()` for details. Default: None.
+    """
+
+    if logger == 'silent':
+        return
+
+    if isinstance(results[0]['ap'], np.ndarray):
+        num_scales = len(results[0]['ap'])
+    else:
+        num_scales = 1
+
+    if scale_ranges is not None:
+        assert len(scale_ranges) == num_scales
+
+    num_classes = len(results)
+
+    aps = np.zeros((num_scales, num_classes), dtype=np.float32)
+    num_gts = np.zeros((num_scales, num_classes), dtype=int)
+    for i, cls_result in enumerate(results):
+        if cls_result['recall'].size > 0:
+            recalls[:, i] = np.array(cls_result['recall'], ndmin=2)[:, -1]
+        aps[:, i] = cls_result['ap']
+        num_gts[:, i] = cls_result['num_gts']
+
+    if dataset is None:
+        label_names = [str(i) for i in range(num_classes)]
+    elif mmcv.is_str(dataset):
+        label_names = get_classes(dataset)
+    else:
+        label_names = dataset
+
+    if not isinstance(mean_ap, list):
+        mean_ap = [mean_ap]
+
+    header = ['class', 'gts', 'dets', 'precision']
+    for i in range(num_scales):
+        if scale_ranges is not None:
+            print_log(f'Scale range {scale_ranges[i]}', logger=logger)
+        table_data = [header]
+        for j in range(num_classes):
+            row_data = [
+                label_names[j], num_gts[i, j], results[j]['num_dets'],
+                f'{recalls[i, j]:.3f}', f'{aps[i, j]:.3f}'
+            ]
+            table_data.append(row_data)
+        table_data.append(['mAP', '', '', '', f'{mean_ap[i]:.3f}'])
+        table = AsciiTable(table_data)
+        table.inner_footing_row_border = True
+        print_log('\n' + table.table, logger=logger)
