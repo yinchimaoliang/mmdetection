@@ -1,5 +1,6 @@
 from mmdet.apis import init_detector, inference_detector, show_result_pyplot
 import mmcv
+import os
 import os.path as osp
 import argparse
 
@@ -15,34 +16,26 @@ def parse_args():
         '--config-file', help='config file to be used')
     parser.add_argument(
         '--ckpt-path', help='checkpoint file to be used')
-    parser.add_argument(
-        '--score-thr', default=0.3, help='threshold score to show the result')
-    parser.add_argument(
-        '--type', help='type of the task(chromosome_class or chromosome_count)')
     args = parser.parse_args()
 
     return args
 
 def main():
     args = parse_args()
-
+    img_path = args.image_path
     config_file = args.config_file
     checkpoint_file = args.ckpt_path
     result_path = args.result_path
-    score_thr = args.score_thr
-    type = args.type
     mmcv.mkdir_or_exist(result_path)
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
-    with open(args.image_path) as f:
-        names = f.readlines()
+    names = os.listdir(img_path)
     for name in names:
-        name = name[:-1]
-        img = osp.join('data/karyotype', type, 'PNGImages', name + '.png')
+        img = osp.join(img_path, name)
         file_name = name.split('.')[0]
         result = inference_detector(model, img)
         if hasattr(model, 'module'):
             model = model.module
-        img = model.show_result(img, result, score_thr=score_thr, show=False)
+        img = model.show_result(img, result, show=False)
         mmcv.imwrite(img, osp.join(result_path, file_name + '.png'))
         print(f'{file_name} finished.')
 
