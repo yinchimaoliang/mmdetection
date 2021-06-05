@@ -22,6 +22,19 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+def _find_unlabeled_data(data_root):
+    img_data_dir = osp.join(data_root, 'JPEGImages')
+    ann_data_dir = osp.join(data_root, 'Annotations')
+    img_names = os.listdir(img_data_dir)
+    ann_names = os.listdir(ann_data_dir)
+    unlabeled_names = []
+    for img_name in img_names:
+        if img_name not in ann_names:
+            unlabeled_names.append(img_name)
+
+    print(unlabeled_names)
+
+
 def _count_data_info(target_dir):
     annos = glob.glob(osp.join(target_dir, 'Annotations', '*.xml'))
     class_names = []
@@ -221,5 +234,6 @@ def main():
     # print(names)
     _divide_dataset(source_dir, target_dir, train_ratio)
     # _get_class_names(osp.join(source_dir, 'Annotations'))
+    # _find_unlabeled_data(target_dir)
 if __name__ == '__main__':
     main()

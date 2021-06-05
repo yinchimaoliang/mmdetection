@@ -1,5 +1,6 @@
 import argparse
 import os
+import numpy as np
 import warnings
 
 import mmcv
@@ -188,10 +189,24 @@ def main():
                                  args.gpu_collect)
 
     rank, _ = get_dist_info()
+    num_class = len(dataset.CLASSES)
+    gts = [[[] for _ in range(len(dataset.CLASSES))] for _ in range(len(dataset))]
+    for i in range(len(dataset)):
+        data_info = dataset.get_ann_info(i)
+        for j in range(len(data_info['labels'])):
+            bbox = data_info['bboxes'][j]
+            label = data_info['labels'][j]
+            gts[i][label].append(bbox)
+        for j in range(num_class):
+            if len(gts[i][j]) == 0:
+                gts[i][j] = np.zeros((0, 4))
+            else:
+                gts[i][j] = np.stack(gts[i][j])
     if rank == 0:
         if args.out:
             print(f'\nwriting results to {args.out}')
             mmcv.dump(outputs, args.out)
+            mmcv.dump(gts, os.path.join(os.path.split(args.out)[0], 'gt.pkl'))
         kwargs = {} if args.eval_options is None else args.eval_options
         if args.format_only:
             dataset.format_results(outputs, **kwargs)
