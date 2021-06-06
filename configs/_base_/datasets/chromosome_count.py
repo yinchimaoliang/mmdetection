@@ -53,4 +53,4 @@ data = dict(
         img_prefix=data_root,
         pipeline=test_pipeline,
         classes=classes))
-evaluation = dict(interval=1, metric='mAP')
+evaluation = dict(interval=1, metric='mAP', save_best='mAP', rule='greater')
