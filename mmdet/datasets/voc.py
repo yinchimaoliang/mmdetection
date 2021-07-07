@@ -41,8 +41,8 @@ class VOCDataset(XMLDataset):
                 img,
                 anno['bboxes'],
                 anno['labels'],
-                bbox_color='red',
-                text_color='red',
+                bbox_color='green',
+                text_color='green',
                 class_names=classes_pinyin,
                 out_file=osp.join(out_dir, filename),
                 show=False)
