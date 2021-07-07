@@ -11,7 +11,7 @@ You can replace `https://s3.ap-northeast-2.amazonaws.com/open-mmlab` with `https
 - We use distributed training.
 - All pytorch-style pretrained backbones on ImageNet are from PyTorch model zoo, caffe-style pretrained backbones are converted from the newly released model from detectron2.
 - For fair comparison with other codebases, we report the GPU memory as the maximum value of `torch.cuda.max_memory_allocated()` for all 8 GPUs. Note that this value is usually less than what `nvidia-smi` shows.
-- We report the inference time as the total time of network forwarding and post-processing, excluding the data loading time. Results are obtained with the script [benchmark.py](https://github.com/open-mmlab/mmdetection/blob/master/tools/benchmark.py) which computes the average time on 2000 images.
+- We report the inference time as the total time of network forwarding and post-processing, excluding the data loading time. Results are obtained with the script [benchmark.py](https://github.com/open-mmlab/mmdetection/blob/master/tools/analysis_tools/benchmark.py) which computes the average time on 2000 images.
 
 ## Baselines
 
@@ -183,6 +183,27 @@ Please refer to [ResNeSt](https://github.com/open-mmlab/mmdetection/blob/master/
 
 Please refer to [DETR](https://github.com/open-mmlab/mmdetection/blob/master/configs/detr) for details.
 
+### Deformable DETR
+
+Please refer to [Deformable DETR](https://github.com/open-mmlab/mmdetection/blob/master/configs/deformable_detr) for details.
+
+### AutoAssign
+
+Please refer to [AutoAssign](https://github.com/open-mmlab/mmdetection/blob/master/configs/autoassign) for details.
+
+### YOLOF
+
+Please refer to [YOLOF](https://github.com/open-mmlab/mmdetection/blob/master/configs/yolof) for details.
+
+
+### Seesaw Loss
+
+Please refer to [Seesaw Loss](https://github.com/open-mmlab/mmdetection/blob/master/configs/seesaw_loss) for details.
+
+### CenterNet
+
+Please refer to [CenterNet](https://github.com/open-mmlab/mmdetection/blob/master/configs/centernet) for details.
+
 ### Other datasets
 
 We also benchmark some methods on [PASCAL VOC](https://github.com/open-mmlab/mmdetection/blob/master/configs/pascal_voc), [Cityscapes](https://github.com/open-mmlab/mmdetection/blob/master/configs/cityscapes) and [WIDER FACE](https://github.com/open-mmlab/mmdetection/blob/master/configs/wider_face).
@@ -193,19 +214,34 @@ We also train [Faster R-CNN](https://github.com/open-mmlab/mmdetection/blob/mast
 
 ## Speed benchmark
 
+### Training Speed benchmark
+
+We provide [analyze_logs.py](https://github.com/open-mmlab/mmdetection/blob/master/tools/analysis_tools/analyze_logs.py) to get average time of iteration in training. You can find examples in [Log Analysis](https://mmdetection.readthedocs.io/en/latest/useful_tools.html#log-analysis).
+
 We compare the training speed of Mask R-CNN with some other popular frameworks (The data is copied from [detectron2](https://github.com/facebookresearch/detectron2/blob/master/docs/notes/benchmarks.md)).
 For mmdetection, we benchmark with [mask_rcnn_r50_caffe_fpn_poly_1x_coco_v1.py](https://github.com/open-mmlab/mmdetection/blob/master/configs/mask_rcnn/mask_rcnn_r50_caffe_fpn_poly_1x_coco_v1.py), which should have the same setting with [mask_rcnn_R_50_FPN_noaug_1x.yaml](https://github.com/facebookresearch/detectron2/blob/master/configs/Detectron1-Comparisons/mask_rcnn_R_50_FPN_noaug_1x.yaml) of detectron2.
 We also provide the [checkpoint](http://download.openmmlab.com/mmdetection/v2.0/benchmark/mask_rcnn_r50_caffe_fpn_poly_1x_coco_no_aug/mask_rcnn_r50_caffe_fpn_poly_1x_coco_no_aug_compare_20200518-10127928.pth) and [training log](http://download.openmmlab.com/mmdetection/v2.0/benchmark/mask_rcnn_r50_caffe_fpn_poly_1x_coco_no_aug/mask_rcnn_r50_caffe_fpn_poly_1x_coco_no_aug_20200518_105755.log.json) for reference. The throughput is computed as the average throughput in iterations 100-500 to skip GPU warmup time.
 
-| Implementation       | Throughput (img/s) |
-|----------------------|--------------------|
-| [Detectron2](https://github.com/facebookresearch/detectron2) | 62 |
-| [MMDetection](https://github.com/open-mmlab/mmdetection) | 61 |
-| [maskrcnn-benchmark](https://github.com/facebookresearch/maskrcnn-benchmark/)   | 53 |
-| [tensorpack](https://github.com/tensorpack/tensorpack/tree/master/examples/FasterRCNN) | 50 |
-| [simpledet](https://github.com/TuSimple/simpledet/) | 39 |
-| [Detectron](https://github.com/facebookresearch/Detectron) | 19 |
-| [matterport/Mask_RCNN](https://github.com/matterport/Mask_RCNN/) | 14 |
+| Implementation                                                                         | Throughput (img/s) |
+| -------------------------------------------------------------------------------------- | ------------------ |
+| [Detectron2](https://github.com/facebookresearch/detectron2)                           | 62                 |
+| [MMDetection](https://github.com/open-mmlab/mmdetection)                               | 61                 |
+| [maskrcnn-benchmark](https://github.com/facebookresearch/maskrcnn-benchmark/)          | 53                 |
+| [tensorpack](https://github.com/tensorpack/tensorpack/tree/master/examples/FasterRCNN) | 50                 |
+| [simpledet](https://github.com/TuSimple/simpledet/)                                    | 39                 |
+| [Detectron](https://github.com/facebookresearch/Detectron)                             | 19                 |
+| [matterport/Mask_RCNN](https://github.com/matterport/Mask_RCNN/)                       | 14                 |
+
+### Inference Speed Benchmark
+
+We provide [benchmark.py](https://github.com/open-mmlab/mmdetection/blob/master/tools/analysis_tools/benchmark.py) to benchmark the inference latency.
+The script benchmarkes the model with 2000 images and calculates the average time ignoring first 5 times. You can change the output log interval (defaults: 50) by setting `LOG-INTERVAL`.
+
+```shell
+python toools/benchmark.py ${CONFIG} ${CHECKPOINT} [--log-interval $[LOG-INTERVAL]] [--fuse-conv-bn]
+```
+
+The latency of all models in our model zoo is benchmarked without setting `fuse-conv-bn`, you can get a lower latency by setting it.
 
 ## Comparison with Detectron2
 
@@ -228,18 +264,18 @@ For fair comparison, we install and run both frameworks on the same machine.
 
 ### Performance
 
-| Type         | Lr schd | Detectron2  | mmdetection | Download |
-|--------------|---------|-------------|-------------|-------------|
-| [Faster R-CNN](https://github.com/open-mmlab/mmdetection/blob/master/configs/faster_rcnn/faster_rcnn_r50_caffe_fpn_mstrain_1x_coco.py) | 1x      | [37.9](https://github.com/facebookresearch/detectron2/blob/master/configs/COCO-Detection/faster_rcnn_R_50_FPN_1x.yaml)        | 38.0        | [model](http://download.openmmlab.com/mmdetection/v2.0/benchmark/faster_rcnn_r50_caffe_fpn_mstrain_1x_coco/faster_rcnn_r50_caffe_fpn_mstrain_1x_coco-5324cff8.pth) &#124; [log](http://download.openmmlab.com/mmdetection/v2.0/benchmark/faster_rcnn_r50_caffe_fpn_mstrain_1x_coco/faster_rcnn_r50_caffe_fpn_mstrain_1x_coco_20200429_234554.log.json) |
-| [Mask R-CNN](https://github.com/open-mmlab/mmdetection/blob/master/configs/mask_rcnn/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_coco.py)   | 1x      | [38.6 & 35.2](https://github.com/facebookresearch/detectron2/blob/master/configs/COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_1x.yaml) | 38.8 & 35.4 | [model](http://download.openmmlab.com/mmdetection/v2.0/benchmark/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_coco/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_coco-dbecf295.pth) &#124; [log](http://download.openmmlab.com/mmdetection/v2.0/benchmark/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_coco/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_coco_20200430_054239.log.json) |
-| [Retinanet](https://github.com/open-mmlab/mmdetection/blob/master/configs/retinanet/retinanet_r50_caffe_fpn_mstrain_1x_coco.py)    | 1x      | [36.5](https://github.com/facebookresearch/detectron2/blob/master/configs/COCO-Detection/retinanet_R_50_FPN_1x.yaml)        | 37.0        | [model](http://download.openmmlab.com/mmdetection/v2.0/benchmark/retinanet_r50_caffe_fpn_mstrain_1x_coco/retinanet_r50_caffe_fpn_mstrain_1x_coco-586977a0.pth) &#124; [log](http://download.openmmlab.com/mmdetection/v2.0/benchmark/retinanet_r50_caffe_fpn_mstrain_1x_coco/retinanet_r50_caffe_fpn_mstrain_1x_coco_20200430_014748.log.json) |
+| Type                                                                                                                                   | Lr schd | Detectron2                                                                                                                             | mmdetection | Download                                                                                                                                                                                                                                                                                                                                                           |
+| -------------------------------------------------------------------------------------------------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Faster R-CNN](https://github.com/open-mmlab/mmdetection/blob/master/configs/faster_rcnn/faster_rcnn_r50_caffe_fpn_mstrain_1x_coco.py) | 1x      | [37.9](https://github.com/facebookresearch/detectron2/blob/master/configs/COCO-Detection/faster_rcnn_R_50_FPN_1x.yaml)                 | 38.0        | [model](http://download.openmmlab.com/mmdetection/v2.0/benchmark/faster_rcnn_r50_caffe_fpn_mstrain_1x_coco/faster_rcnn_r50_caffe_fpn_mstrain_1x_coco-5324cff8.pth) &#124; [log](http://download.openmmlab.com/mmdetection/v2.0/benchmark/faster_rcnn_r50_caffe_fpn_mstrain_1x_coco/faster_rcnn_r50_caffe_fpn_mstrain_1x_coco_20200429_234554.log.json)             |
+| [Mask R-CNN](https://github.com/open-mmlab/mmdetection/blob/master/configs/mask_rcnn/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_coco.py)  | 1x      | [38.6 & 35.2](https://github.com/facebookresearch/detectron2/blob/master/configs/COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_1x.yaml) | 38.8 & 35.4 | [model](http://download.openmmlab.com/mmdetection/v2.0/benchmark/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_coco/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_coco-dbecf295.pth) &#124; [log](http://download.openmmlab.com/mmdetection/v2.0/benchmark/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_coco/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_coco_20200430_054239.log.json) |
+| [Retinanet](https://github.com/open-mmlab/mmdetection/blob/master/configs/retinanet/retinanet_r50_caffe_fpn_mstrain_1x_coco.py)        | 1x      | [36.5](https://github.com/facebookresearch/detectron2/blob/master/configs/COCO-Detection/retinanet_R_50_FPN_1x.yaml)                   | 37.0        | [model](http://download.openmmlab.com/mmdetection/v2.0/benchmark/retinanet_r50_caffe_fpn_mstrain_1x_coco/retinanet_r50_caffe_fpn_mstrain_1x_coco-586977a0.pth) &#124; [log](http://download.openmmlab.com/mmdetection/v2.0/benchmark/retinanet_r50_caffe_fpn_mstrain_1x_coco/retinanet_r50_caffe_fpn_mstrain_1x_coco_20200430_014748.log.json)                     |
 
 ### Training Speed
 
 The training speed is measure with s/iter. The lower, the better.
 
 | Type         | Detectron2 | mmdetection |
-|--------------|------------|-------------|
+| ------------ | ---------- | ----------- |
 | Faster R-CNN | 0.210      | 0.216       |
 | Mask R-CNN   | 0.261      | 0.265       |
 | Retinanet    | 0.200      | 0.205       |
@@ -253,7 +289,7 @@ We also include the officially reported speed in the parentheses, which is sligh
 than the results tested on our server due to differences of hardwares.
 
 | Type         | Detectron2  | mmdetection |
-|--------------|-------------|-------------|
+| ------------ | ----------- | ----------- |
 | Faster R-CNN | 25.6 (26.3) | 22.2        |
 | Mask R-CNN   | 22.5 (23.3) | 19.6        |
 | Retinanet    | 17.8 (18.2) | 20.6        |
@@ -261,7 +297,7 @@ than the results tested on our server due to differences of hardwares.
 ### Training memory
 
 | Type         | Detectron2 | mmdetection |
-|--------------|------------|-------------|
+| ------------ | ---------- | ----------- |
 | Faster R-CNN | 3.0        | 3.8         |
 | Mask R-CNN   | 3.4        | 3.9         |
 | Retinanet    | 3.9        | 3.4         |
